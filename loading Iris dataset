@@ -1,0 +1,73 @@
+#importing datasets 
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+
+#need to load datasets
+
+iris = load_iris()
+df= pd.DataFrame(iris.data, columns=iris.feature_names)
+
+df.head()
+
+df.shape
+
+df.describe()
+
+df['species']=iris.target
+
+df.columns
+
+'''# descriptive statistics we r going to do here
+
+print("mean :",df.mean(numeric_only=True))
+
+# std deviation - it will spread the data with ref to mean
+Measures how spread out data values are from the mean
+Low SD → values are close to the mean
+High SD → values are widely spread
+Shows data variability
+Used to understand consistency of data
+
+# skewness - it explains abt the the (asymmetry),left(data is left to mean),right(data is right to mean), if data is in middle(skewness is "0".. it means equally divided)
+Measures asymmetry of data distribution
+Skewness = 0 → perfectly symmetric
+Positive skew → tail on the right
+Negative skew → tail on the left
+Shows data bias direction
+
+
+# kurtosis - it tells abt peakness used to identify outliers (like normal deviation)
+ Measures peakedness or tail heaviness
+High kurtosis → sharp peak, heavy tails
+Low kurtosis → flat peak, light tails
+Normal distribution kurtosis ≈ 3
+Indicates outliers presence'''
+
+print("median :" , df.median(numeric_only=True))
+
+print("dt_deviation :", df.std(numeric_only=True))
+
+print("kurtosis :" , df.kurtosis(numeric_only=True))
+
+print("skewness :", df.skew(numeric_only=True))
+
+# boxplot :
+
+plt.figure(figsize=(8,5))
+df.drop('species', axis =1).boxplot()
+plt.title("boxplot of iris features")
+plt.show()
+
+#histogram for saple length
+
+plt.figure(figsize=(6,4))
+plt.hist(df['sepal length (cm)'], bins=10)
+plt.title("histogram of sepal length")
+plt.xlabel("sepal length")
+plt.ylabel("frequency")
+plt.show()
+
+
