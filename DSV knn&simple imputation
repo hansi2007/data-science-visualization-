@@ -1,0 +1,106 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.impute import SimpleImputer, KNNImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data"
+
+columns =['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal','target']
+
+df = pd.read_csv(url, names=columns)
+
+df.head()
+
+df.shape
+
+df.info()
+
+df.describe()
+
+ques_counts=(df=="?").sum()
+ques_counts
+
+#replace ? with NaN
+
+df.replace("?",np.nan,inplace=True)
+
+#convert to numaric
+
+df = df.apply(pd.to_numeric)
+
+#convert target to binary (0 = no  disease, 1 = disease)
+df["target"] = (df['target']> 0).astype(int)
+
+print("first 5 records:")
+print(df.head())
+
+print("missing values in each column:")
+print(df.isnull().sum())
+
+
+# mean imputation
+mean_imputer = SimpleImputer(strategy='mean')
+df_mean = pd.DataFrame(mean_imputer.fit_transform(df), columns=df.columns)
+
+# knn imputation
+knn_imputer = KNNImputer(n_neighbors=5)
+df_knn = pd.DataFrame(knn_imputer.fit_transform(df), columns=df.columns)
+
+# iterative imputation
+iter_imputer = IterativeImputer()
+df_iter = pd.DataFrame(iter_imputer.fit_transform(df), columns=df.columns)
+
+print("sample comparision for 'chol' and 'trestbps':")
+print("mean imputation ", df_mean [['chol', 'trestbps']].head())
+print("knn imputation ", df_knn[['chol', 'trestbps']].head())
+print("iterative imputation ", df_iter[['chol', 'trestbps']].head())
+
+# mean imputation
+mean_imputer = SimpleImputer(strategy='mean')
+df_mean = pd.DataFrame(mean_imputer.fit_transform(df), columns=df.columns)
+
+print("sample comparision for 'chol' and 'trestbps':")
+print("mean imputation ", df_mean [['chol', 'trestbps']].head())
+
+
+
+# knn imputation
+knn_imputer = KNNImputer(n_neighbors=5)
+df_knn = pd.DataFrame(knn_imputer.fit_transform(df), columns=df.columns)
+
+print("knn imputation ", df_knn[['chol', 'trestbps']].head())
+
+
+# iterative imputation
+iter_imputer = IterativeImputer()
+df_iter = pd.DataFrame(iter_imputer.fit_transform(df), columns=df.columns)
+print("iterative imputation ", df_iter[['chol', 'trestbps']].head())
+  
+
+#visualization of imputation before and after
+
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1,4,1)
+df['chol'].plot(kind='box')
+plt.title('original(with missing)')
+
+plt.subplot(1,4,2)
+df_mean['chol'].plot(kind='box')
+plt.title('mean imputation')
+
+plt.subplot(1,4,3)
+df_knn['chol'].plot(kind='box')
+plt.title('knn imputation')
+
+plt.subplot(1,4,4)
+df_iter['chol'].plot(kind='box')
+plt.title('iterative imputation')
+
+plt.tight_layout()
+plt.show()
+
