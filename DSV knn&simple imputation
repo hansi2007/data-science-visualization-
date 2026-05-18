@@ -104,3 +104,48 @@ plt.title('iterative imputation')
 plt.tight_layout()
 plt.show()
 
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import RFE
+from sklearn.preprocessing import StandardScaler
+
+
+
+# separate features and target using the iterativy impute dataframe
+
+x = df_iter.drop("target", axis=1)
+y = df_iter["target"]
+
+
+#standardization
+
+scaler=StandardScaler()
+x_scaled=scaler.fit_transform(x)
+
+# train-test split
+
+x_train, X_test, y_train, y_test = train_test_split(x_scaled, y, test_size=0.2, random_state=42)
+
+
+# logistic regression
+
+model= LogisticRegression(max_iter=500)
+
+#apply rfe to select top 5 features
+
+rfe=RFE(model,n_features_to_select=5)
+rfe.fit(x_train,y_train)
+
+# get selected features
+
+selected_features = x.columns[rfe.support_]
+ranking = rfe.ranking_
+
+print("selected features:",selected_features)
+print("feature ranking:",ranking)
+
+print(" feature ranking:")
+for feature, rank in zip(x.columns, ranking):
+    print(f"{feature}: {rank}")
+
+
