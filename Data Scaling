@@ -40,3 +40,49 @@ print(x_standard.head())
 print(" standard scaled data sample:")
 print(x_standard.head())
 
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+
+#feature & target
+
+x=df.drop("target",  axis=1)
+y=df["target"]
+
+# scaler feature before PCA
+
+scaler= StandardScaler()
+x_scaled= scaler.fit_transform(x)
+
+# model before PCA
+
+x_train , x_test , y_train, y_test = train_test_split(x_scaled, y, test_size=0.2, random_state=42)
+
+model=LogisticRegression(max_iter=1000)
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
+acc_before = accuracy_score(y_test, y_pred)
+
+print("accuracy before PCA :", acc_before)
+
+# apply  PCA
+
+pca =PCA(n_components=2)
+x_pca = pca.fit_transform(x_scaled)
+
+print("explained varience ratio:", pca.explained_variance_ratio_)
+print("total varience explained :", np.sum(pca.explained_variance_ratio_))
+
+#model after PCA
+x_train_pca , x_test_pca , y_train_pca, y_test_pca = train_test_split(x_pca, y, test_size=0.2, random_state=42)
+
+model_pca=LogisticRegression(max_iter=1000)
+model_pca.fit(x_train_pca, y_train_pca)
+y_pred_pca = model_pca.predict(x_test_pca)
+acc_after = accuracy_score(y_test_pca, y_pred_pca)
+
+print("accuracy after pca :", acc_after)
+
+
