@@ -1,0 +1,83 @@
+from sklearn.datasets import load_breast_cancer
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression 
+from sklearn.metrics import accuracy_score
+import pandas as pd
+
+# load dataset 
+data = load_breast_cancer()
+x = pd.DataFrame(data.data , columns =  data.feature_names)
+y = data.target
+
+# wrong methos (data leakage0
+scaler = StandardScaler()
+x_scaled_wrong = scaler.fit_transform(x) # scaling before split -> leakage 
+x_train_w , x_test_w , y_train_w , y_test_w = train_test_split(
+    x_scaled_wrong , y , test_size=0.2 , random_state=42)
+model_wrong = LogisticRegression(max_iter=1000)
+model_wrong.fit(x_train_w , y_train_w)
+y_pred_wrong = model_wrong.predict(x_test_w)
+acc_wrong = accuracy_score(y_test_w , y_pred_wrong)
+
+print("accuracy with data leakage :", acc_wrong)
+
+# correct method ( no leakage)
+x_train , x_test , y_train , y_test = train_test_split(
+    x,y,test_size=0.2 , random_state=42)
+scaler = StandardScaler()
+x_train_scaled = scaler.fit_transform(x_train) # fit only on training data 
+x_test_scaled = scaler.transform(x_test)
+
+model = LogisticRegression(max_iter=1000)
+model.fit(x_train_scaled , y_train)
+y_pred = model.predict(x_test_scaled)
+acc_correct = accuracy_score(y_test , y_pred)
+
+print("accuracy without data leakage :", acc_correct)
+
+print("accuracy with data leakage :", acc_wrong)
+print("accuracy without data leakage :", acc_correct)
+
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.pipeline import Pipeline
+
+# create pipeline to avoid leakage  inside cv 
+pipeline = Pipeline([
+    ('scaler ' , StandardScaler ()),
+    (' model ' , LogisticRegression(max_iter=1000))])
+
+# K-fold (k=10)
+
+Kfold = KFold(n_splits=10 , shuffle=True , random_state=42)
+
+scores = cross_val_score(pipeline , x , y , cv=KFold, scoring='accuarcy')
+print("accuracy for each fold :")
+for i, score in enumerate(scores, 1 ):
+    print(f"Fold {i} :{score} ")
+
+print(" average accuracy :", scores.mean())
+
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.pipeline import Pipeline
+
+# create pipeline to avoid leakage  inside cv 
+pipeline = Pipeline([
+    ('scaler ' , StandardScaler ()),
+    (' model ' , LogisticRegression(max_iter=1000))])
+
+# K-fold (k=10)
+
+kfold = KFold(n_splits=10 , shuffle=True , random_state=42)
+
+scores = cross_val_score(pipeline , x , y , cv=kfold, scoring='accuracy')
+print("accuracy for each fold :")
+for i, score in enumerate(scores, 1 ):
+    print(f"Fold {i} :{score} ")
+
+print("\n average accuracy :", scores.mean())
+
+
+
+
+
